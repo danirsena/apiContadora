@@ -13,7 +13,7 @@ class FilterConfig(
     fun registerApiKeyFilter(): FilterRegistrationBean<ApiKeyFilter> {
         val registration = FilterRegistrationBean<ApiKeyFilter>()
         registration.filter = apiKeyFilter
-        registration.addUrlPatterns("/apiContadora/*") // protege todas as rotas
+        registration.addUrlPatterns("/*") // protege todas as rotas
         registration.order = 1
         return registration
     }

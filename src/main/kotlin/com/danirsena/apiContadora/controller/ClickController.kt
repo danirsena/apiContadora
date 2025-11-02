@@ -1,9 +1,7 @@
 package com.danirsena.apiContadora.controller
 
 import com.danirsena.apiContadora.dto.ClickGetInfoDTO
-import com.danirsena.apiContadora.entities.Click
 import com.danirsena.apiContadora.repository.ClickRepository
-import com.danirsena.apiContadora.repository.LinkRespository
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -13,10 +11,9 @@ import org.springframework.web.bind.annotation.RestController
 import kotlin.collections.map
 
 @RestController
-@RequestMapping("apiContadora/click")
+@RequestMapping("click")
 class ClickController(
-    val clickRepository: ClickRepository,
-    val linkRespository: LinkRespository
+    val clickRepository: ClickRepository
 ) {
 
     @GetMapping("/sayHello")

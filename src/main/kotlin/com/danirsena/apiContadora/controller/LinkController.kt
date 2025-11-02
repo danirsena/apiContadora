@@ -1,12 +1,13 @@
 package com.danirsena.apiContadora.controller
 
-import com.danirsena.apiContadora.dto.ClickGetDTO
 import com.danirsena.apiContadora.dto.LinkCreateDTO
 import com.danirsena.apiContadora.dto.LinkGetDTO
+import com.danirsena.apiContadora.dto.LinkUpdateDTO
 import com.danirsena.apiContadora.entities.Click
 import com.danirsena.apiContadora.entities.Link
 import com.danirsena.apiContadora.repository.ClickRepository
 import com.danirsena.apiContadora.repository.LinkRespository
+import jakarta.transaction.Transactional
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime
 
 @RestController
-@RequestMapping("apiContadora/link")
+@RequestMapping("/link")
 class LinkController(val linkRespository: LinkRespository, val clickRepository: ClickRepository) {
 
     @GetMapping("/sayHello")
@@ -34,7 +35,8 @@ class LinkController(val linkRespository: LinkRespository, val clickRepository: 
             LinkGetDTO(
                 it.id,
                 it.url,
-                it.contador
+                it.contador,
+                it.clicks.map { click -> click.clickedAt.toString() }
             )
         }
         return ResponseEntity.ok().body(responseLinks)
@@ -44,12 +46,15 @@ class LinkController(val linkRespository: LinkRespository, val clickRepository: 
     fun getUrl(@PathVariable id: Long): ResponseEntity<LinkGetDTO> {
         val getUrl = linkRespository.findById(id)
 
+        val getLinks = clickRepository.findByLink(getUrl.get())
+
         if (getUrl.isEmpty()) return ResponseEntity.notFound().build()
 
         val returnUrl = LinkGetDTO(
             id = getUrl.get().id,
             url = getUrl.get().url,
-            cont = getUrl.get().contador
+            cont = getUrl.get().contador,
+            listCLicks = getLinks.map { click -> click.clickedAt.toString() }
         )
 
         return ResponseEntity.ok().body(returnUrl)
@@ -69,15 +74,31 @@ class LinkController(val linkRespository: LinkRespository, val clickRepository: 
         return ResponseEntity.ok().body(linkDto)
     }
 
-    @PutMapping("/updateUrl/{id}")
-    fun updateUrl(@PathVariable id: Long, @RequestBody updateLinkDTO: LinkCreateDTO): ResponseEntity<Link> {
+    @PutMapping("/updateUrlLink/{id}")
+    fun updateUrl(@PathVariable id: Long, @RequestBody updateLinkDTO: LinkUpdateDTO): ResponseEntity<Link> {
 
         val link = linkRespository.findById(id)
 
         if (link.isEmpty()) return ResponseEntity.notFound().build()
 
-        link.get().url = updateLinkDTO.url.ifEmpty { link.get().url }
+        link.get().url = updateLinkDTO.url.ifBlank { link.get().url }
+
+        linkRespository.save(link.get())
+
+        return ResponseEntity.ok().body(link.get())
+    }
+
+    @Transactional
+    @PutMapping("/zerarContador/{id}")
+    fun updateContador(@PathVariable id: Long): ResponseEntity<Link> {
+
+        val link = linkRespository.findById(id)
+
+        if (link.isEmpty()) return ResponseEntity.notFound().build()
+
         link.get().contador = 0
+
+        clickRepository.deleteAllByLink(link.get())
 
         linkRespository.save(link.get())
 
