@@ -32,7 +32,7 @@ class ApiKeyFilter(
 
         if (headerKey == null || headerKey != apiKey) {
             response.status = HttpServletResponse.SC_UNAUTHORIZED
-            response.writer.write("API key inválida ou ausente.")
+            response.writer.write("API key invalida ou ausente.")
             return
         }
 
