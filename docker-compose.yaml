@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16-alpine # Versão estável do Postgres
+    restart: always
+    environment:
+      POSTGRES_USER: devuser      # Usuário do banco
+      POSTGRES_PASSWORD: devpass  # Senha do banco
+      POSTGRES_DB: contapi-db        # Nome do banco de dados
+    ports:
+      - "5432:5432" # Mapeia a porta 5432 do container para a sua máquina
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Volume persistente para os dados
+
+volumes:
+  postgres_data:
